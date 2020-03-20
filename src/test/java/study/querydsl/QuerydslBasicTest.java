@@ -2,10 +2,9 @@ package study.querydsl;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -235,4 +234,43 @@ public class QuerydslBasicTest {
 		return usernameEq(userNameParam).and(ageEq(ageParam));
 	}
 
+
+	@Test
+	public void bulkUpdate(){
+		//member 1 = 10 -> 비회원
+		//member 2 = 20 -> 비회원
+		//member 3 = 30 -> 유지
+		//member 4 = 40 -> 유
+
+		List<Member> results1 = queryFactory
+				.selectFrom(member)
+				.fetch();
+
+		long count = queryFactory
+				.update(member)
+				.set(member.username, "비회원")
+				.where(member.age.lt(28))
+				.execute();
+
+
+		List<Member> results = queryFactory
+								.selectFrom(member)
+								.fetch();
+		for (Member result : results) {
+			System.out.println("result  = " + result);
+		}
+	}
+
+	@Test
+	public void sqlFunction(){
+		List<String> results = queryFactory
+				.select(Expressions.stringTemplate("function('replace', {0}, {1}, {2})",
+												   member.username, "member", "M"))
+				.from(member)
+				.fetch();
+
+		for (String result : results) {
+			System.out.println(result);
+		}
+	}
 }
